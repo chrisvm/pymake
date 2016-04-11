@@ -22,8 +22,16 @@ class CMakeListCommand(CMakeCommand):
 		if self.options.ast:
 			# get file
 			contents = get_cmakelists_file()
+
 			# if not found, exit
 			if contents is None:
 				print("error: CMakeLists file not found on '{}'".format(os.getcwd()))
+			
+			# parse ast 
 			ast = cmakeast.ast.parse(contents)
-			print(ast)
+			
+			# pprint ast 
+			self.pprint_ast(ast)
+
+	def pprint_ast(self, ast):
+		pass

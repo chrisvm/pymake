@@ -22,12 +22,13 @@ class CMakeListCommand(CMakeCommand):
 		# if ast
 		if self.options.ast:
 			# get file
-			contents = get_cmakelists_file()
+			contents = get_cmakelists_file(self.options.file)
 
 			# if not found, exit
 			if contents is None:
 				print("error: CMakeLists file not found on '{}'".format(os.getcwd()))
-			
+				exit()
+				
 			# parse ast 
 			ast = cmakeast.ast.parse(contents)
 			
@@ -37,7 +38,7 @@ class CMakeListCommand(CMakeCommand):
 	def pprint_ast(self, ast):
 		t_bracket, l_bracket = 0x02EA, 0x02EB
 		nodes = deque([{"name": "TopLevelBody", "ast": ast, "indent": 0}])
-		# todo: finish this method
+
 		# start loop
 		while len(nodes) != 0:
 			node = nodes.popleft()

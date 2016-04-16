@@ -20,6 +20,7 @@ class CMakeCommander(object):
 
 		# add arguments
 		parser.add_argument('--clean', action='store_true', help='if set, remove cmake created files on finish', default=False)
+		parser.add_argument('--file', type=str, help='specify the location of the CMakeLists.txt file')
 
 		# iterate to get subparsers
 		subparsers = parser.add_subparsers(help='commands   ', dest='command')

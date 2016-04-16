@@ -1,6 +1,7 @@
-from cmake_command import CMakeCommand
 import cmakeast
 import os
+from cmake_command import CMakeCommand
+from collections import deque
 from cmake_utils import get_cmakelists_file
 
 
@@ -34,4 +35,37 @@ class CMakeListCommand(CMakeCommand):
 			self.pprint_ast(ast)
 
 	def pprint_ast(self, ast):
-		pass
+		t_bracket, l_bracket = 0x02EA, 0x02EB
+		nodes = deque([{"name": "TopLevelBody", "ast": ast, "indent": 0}])
+		# todo: finish this method
+		# start loop
+		while len(nodes) != 0:
+			node = nodes.popleft()
+
+			# if block
+			if node['name'] == 'TopLevelBody' or node['name'] == 'Body':
+				print(' ' * node['indent'], '', node['name'])
+
+				for stmt in node['ast'].statements:
+					tnode = {'ast': stmt, 'indent': node['indent'] + 4}
+					tnode['name'] = self.get_node_name(node['ast'])
+					nodes.append(tnode)
+
+			if node['name'] == 'FunctionCall':
+				print(' ' * node['indent'], t_bracket, node['name'])
+
+				for arg in node.arguments:
+					tnode = {'ast': arg, 'indent': node['indent'] + 4}
+					tnode['name'] = self.get_node_name(node)
+					nodes.append(tnode)
+
+
+	def get_node_name(self, node):
+		opts = {
+			"FunctionCall": cmakeast.ast.FunctionCall,
+			"Word": cmakeast.ast.Word
+		}
+		for k,v in opts.items():
+			if isinstance(node, v):
+				return k
+		return 'None'

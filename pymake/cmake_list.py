@@ -19,29 +19,32 @@ class CMakeListCommand(CMakeCommand):
 		parser.set_defaults(func=self)
 
 	def run(self):
+		# get file
+		contents = get_cmakelists_file(self.options.file)
+
+		# if not found, exit
+		if contents is None:
+			print("error: CMakeLists file not found on '{}'".format(os.getcwd()))
+			exit()
+
+		# parse ast
+		ast = cmakeast.ast.parse(contents)
+
 		# if ast
 		if self.options.ast:
-			# get file
-			contents = get_cmakelists_file(self.options.file)
-
-			# if not found, exit
-			if contents is None:
-				print("error: CMakeLists file not found on '{}'".format(os.getcwd()))
-				exit()
-				
-			# parse ast 
-			ast = cmakeast.ast.parse(contents)
-			
 			# pprint ast 
 			self.pprint_ast(ast)
+			return
+
+
 
 	def pprint_ast(self, ast):
 		t_bracket, l_bracket = 0x02EA, 0x02EB
-		nodes = deque([{"name": "TopLevelBody", "ast": ast, "indent": 0}])
+		nodes = [{"name": "TopLevelBody", "ast": ast, "indent": 0}]
 
 		# start loop
 		while len(nodes) != 0:
-			node = nodes.popleft()
+			node = nodes.pop()
 
 			# if block
 			if node['name'] == 'TopLevelBody' or node['name'] == 'Body':
@@ -49,16 +52,21 @@ class CMakeListCommand(CMakeCommand):
 
 				for stmt in node['ast'].statements:
 					tnode = {'ast': stmt, 'indent': node['indent'] + 4}
-					tnode['name'] = self.get_node_name(node['ast'])
-					nodes.append(tnode)
+					tnode['name'] = self.get_node_name(tnode['ast'])
+					nodes.insert(0, tnode)
 
+			# if function call
 			if node['name'] == 'FunctionCall':
-				print(' ' * node['indent'], t_bracket, node['name'])
-
-				for arg in node.arguments:
+				print(' ' * node['indent'], chr(t_bracket), node['name'], '(name={})'.format(node['ast'].name))
+				node['ast'].arguments.reverse()
+				for arg in node['ast'].arguments:
 					tnode = {'ast': arg, 'indent': node['indent'] + 4}
-					tnode['name'] = self.get_node_name(node)
+					tnode['name'] = self.get_node_name(tnode['ast'])
 					nodes.append(tnode)
+
+			# if word
+			if node['name'] == 'Word':
+				print(' ' * node['indent'], chr(t_bracket), node['ast'])
 
 
 	def get_node_name(self, node):

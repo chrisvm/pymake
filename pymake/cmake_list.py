@@ -36,8 +36,6 @@ class CMakeListCommand(CMakeCommand):
 			self.pprint_ast(ast)
 			return
 
-
-
 	def pprint_ast(self, ast):
 		t_bracket, l_bracket = 0x02EA, 0x02EB
 		nodes = [{"name": "TopLevelBody", "ast": ast, "indent": 0}]
